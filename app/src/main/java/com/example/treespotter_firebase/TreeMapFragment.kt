@@ -1,18 +1,13 @@
 package com.example.treespotter_firebase
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
-import android.text.InputType
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
@@ -35,12 +30,12 @@ import java.util.Date
 import kotlinx.coroutines.*
 
 private const val TAG = "TREE_MAP_FRAGMENT"
+private const val USER_TREE_INPUT = "user_tree_input"
 
 class TreeMapFragment : Fragment() {
 
     private lateinit var addTreeButton: FloatingActionButton
-
-    private var userTreeNameInput = ""
+    private lateinit var addTreeNameButton: FloatingActionButton
 
     private var locationPermissionGranted = false
 
@@ -181,17 +176,31 @@ class TreeMapFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
+
     ): View? {
+
+
         // Inflate the layout for this fragment
         val mainView = inflater.inflate(R.layout.fragment_tree_map, container, false)
+
+        //val userTreeInput: String = requireArguments().getString(USER_TREE_INPUT)!!
+        val treeName: String = requireArguments().getString(USER_TREE_INPUT).toString()
 
         addTreeButton = mainView.findViewById(R.id.add_tree)
         addTreeButton.setOnClickListener {
             // todo add tree at users location - if location permission is granted & location available
-            userAddTreeName()
-            addTreeAtLocation(userTreeNameInput)
-            }
+            if (treeName == "null") {
+                showSnackbar("Tree name is ${treeName}.  Please enter a tree name by clicking the badge icon!")
+            if (treeName.isBlank()) {
+                showSnackbar("Tree name is ${treeName}.  Please enter a tree name by clicking the badge icon!")
+            }} else {
+                addTreeAtLocation(treeName)
+            }}
 
+        addTreeNameButton = mainView.findViewById(R.id.add_tree_name)
+        addTreeNameButton.setOnClickListener {
+            userAddTreeName()
+        }
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map_view) as SupportMapFragment
         mapFragment?.getMapAsync(mapReadyCallback)
@@ -213,7 +222,7 @@ class TreeMapFragment : Fragment() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun addTreeAtLocation(userTreeNameInput:String) {
+    private fun addTreeAtLocation(treeName: String?) {
         if (map == null) { return }
         if (fusedLocationProvider == null) { return }
         if (!locationPermissionGranted) {
@@ -224,8 +233,6 @@ class TreeMapFragment : Fragment() {
         fusedLocationProvider?.lastLocation?.addOnCompleteListener(requireActivity()) { locationRequestTask ->
             val location = locationRequestTask.result
             if (location != null) {
-                //val userTreeNameInput = userAddTreeName()
-                val treeName = userTreeNameInput
                 val tree = Tree(
                     name = treeName,
                     dateSpotted = Date(),
@@ -271,53 +278,34 @@ class TreeMapFragment : Fragment() {
         }
     }
 
-    private fun userAddTreeName(): String {
+    private fun userAddTreeName() {
 
-        val inputField = EditText(requireContext())
+       parentFragmentManager.beginTransaction().replace(R.id.fragmentContainerView, TreeNameInput.newInstance(), "TREEUSERINPUT").commitNow()
+        }
 
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("Enter a tree name:")
-            .setView(inputField)
-            .setPositiveButton("OK") {_,_ ->
-                val userInput = inputField.text.toString()
-                userTreeNameInput = userInput
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        //return listOf("Fir", "Oak", "Pine", "Redwood", "Sequoia").random() // todo ask user for name
 
 
 
-        return userTreeNameInput
 
-    }
-
-    private fun getTreeName():String {
-
-        /*val inflater = layoutInflater
-        val layout = inflater.inflate(R.layout.tree_input_dialog, null )
-        val editText = layout.findViewById<EditText>(R.id.edittext)
-
-
-        AlertDialog.Builder(requireActivity())
-            .setView(R.layout.tree_input_dialog)
-            .setTitle("Enter tree name:")
-            .setPositiveButton(android.R.string.ok){ dialog, id ->
-                editText.text
-
-            }
-            .setNegativeButton(android.R.string.cancel) { dialog, id ->
-                // do nothing
-            }
-            .create()
-            .show()*/
-
-
-        return listOf("Fir", "Oak", "Pine", "Redwood", "Sequoia").random() // todo ask user for name
-
-    }
-
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @param param1 Parameter 1.
+     * @param param2 Parameter 2.
+     * @return A new instance of fragment ResultsFragment.
+     */
+    // TODO: Rename and change types and number of parameters
     companion object {
         @JvmStatic
-        fun newInstance() = TreeMapFragment()
+        fun newInstance(treeName: String?) =
+            TreeMapFragment().apply {
+                arguments = Bundle().apply {
+                    putString(USER_TREE_INPUT, treeName)
+                }
+            }
     }
 }
+
+

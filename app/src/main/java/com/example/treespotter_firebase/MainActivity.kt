@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
             when (tag) {
                 "MAP" -> transaction.replace(
                     R.id.fragmentContainerView,
-                    TreeMapFragment.newInstance(),
+                    TreeMapFragment.newInstance("null"),
                     "MAP"
                 )
 

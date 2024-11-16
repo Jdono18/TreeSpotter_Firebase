@@ -30,4 +30,15 @@
         app:layout_constraintBottom_toBottomOf="@+id/map_view"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_tree_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginBottom="32dp"
+        android:clickable="true"
+        android:src="@drawable/tree_name_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/map_view"
+        app:layout_constraintStart_toEndOf="@+id/add_tree" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
